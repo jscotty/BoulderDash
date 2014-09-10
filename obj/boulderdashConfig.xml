@@ -32,20 +32,20 @@
     </define>
     <verbose-stacktraces>true</verbose-stacktraces>
     <source-path append="true">
-      <path-element>C:\Users\justin\Desktop\boulder dash\game\src</path-element>
+      <path-element>C:\Users\justin\Desktop\boulder dash\BoulderDash\src</path-element>
       <path-element>C:\Program Files (x86)\FlashDevelop\Library\AS3\classes</path-element>
     </source-path>
     <library-path append="true">
-      <path-element>C:\Users\justin\Desktop\boulder dash\game\lib\assets.swc</path-element>
+      <path-element>C:\Users\justin\Desktop\boulder dash\BoulderDash\lib\assets.swc</path-element>
     </library-path>
   </compiler>
   <file-specs>
-    <path-element>C:\Users\justin\Desktop\boulder dash\game\src\Main.as</path-element>
+    <path-element>C:\Users\justin\Desktop\boulder dash\BoulderDash\src\Main.as</path-element>
   </file-specs>
   <default-background-color>#000000</default-background-color>
   <default-frame-rate>30</default-frame-rate>
   <default-size>
     <width>672</width>
-    <height>480</height>
+    <height>412</height>
   </default-size>
 </flex-config>
