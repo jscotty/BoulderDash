@@ -2,8 +2,15 @@ package Game
 {
 	import flash.display.Sprite;
 	import flash.display.Stage;
+	import flash.events.Event;
+	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
 	import flash.net.getClassByAlias;
+	import flash.text.TextField;
+	import flash.text.TextFormat;
+	import Game.Objects.Dirt;
+	import Game.Player.Character;
+	import flash.geom.Rectangle;
 	/**
 	 * ...
 	 * @author justin Bieshaar
@@ -11,8 +18,8 @@ package Game
 	public class Game extends Sprite
 	{
 		private var _grid:Sprite;
-		private var numColumns:Number = 22;
-		private var numRows:Number = 40;
+		private var numColumns:Number = 40;
+		private var numRows:Number = 22;
 		private var cellHeight:Number = 34;
 		private var cellWidth:Number = 34;
 		
@@ -23,30 +30,75 @@ package Game
 		private const diamond:uint = 4;
 		private const player:uint = 5;
 		
-		private var _mapData:Array = [ //0 = dirt, 1 = wall, 2 = wall2 (same as wall but other texture), 3 = stones, 4 = diamonds, 5 = player, 6 = nothing
+		private var row:Number;
+		private var col:Number;
+		
+		public var mapData:Array = [ //0 = dirt, 1 = wall, 2 = wall2 (same as wall but other texture), 3 = stones, 4 = diamonds, 5 = player, 6 = nothing
 									[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
 									[1,0,0,0,0,0,0,6,0,0,4,0,3,6,0,0,0,0,0,3,0,3,0,0,0,0,0,0,0,6,0,0,0,0,3,0,0,0,0,1],
-									[1,0,3,5,3,0,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,3,4,0,0,3,0,0,0,0,6,0,0,0,0,0,0,0,0,1],
+									[1,0,3,6,3,0,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,3,4,0,0,3,0,0,0,0,6,0,0,0,0,0,0,0,0,1],
 									[1,0,0,0,0,0,0,0,0,0,0,6,0,0,3,0,0,0,0,0,3,0,3,0,0,3,0,0,0,0,0,0,0,0,3,0,0,0,0,1],
 									[1,3,0,3,3,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,3,0,0,3,0,0,0,0,3,0,0,0,3,0,0,0,0,0,1],
 									[1,3,0,6,3,0,0,0,0,0,0,0,0,0,6,3,0,0,3,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,3,0,3,3,0,1],
 									[1,0,0,0,6,0,0,3,0,0,0,0,0,0,0,0,3,0,0,0,0,0,3,0,6,3,0,0,0,0,0,0,0,0,3,0,3,3,0,1],
 									[1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,3,0,0,3,0,1],
-									[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,3,4,0,0,0,0,0,0,6,0,1],
-									[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,6,3,0,0,3,0,0,0,0,0,0,0,0,1],
-									[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,6,0,0,3,0,0,3,0,0,0,0,0,0,0,0,1],
-									[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,6,0,4,0,0,0,0,3,0,1],
-									[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,4,0,0,0,0,0,0,0,0,0,3,0,0,4,0,6,0,1],
-									[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,3,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,3,1],
+									[1,0,6,0,0,0,3,0,0,4,6,0,0,3,6,3,0,0,0,0,0,0,0,0,0,0,0,4,0,3,4,0,0,0,0,0,0,6,0,1],
+									[1,0,0,4,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,6,3,0,0,3,0,0,0,0,0,0,0,0,1],
+									[1,0,0,0,3,0,0,3,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,3,6,0,0,3,0,0,3,0,0,0,0,0,0,0,0,1],
+									[1,0,3,0,0,0,0,0,3,0,0,0,0,0,0,0,3,3,3,0,0,0,0,0,0,0,0,3,0,0,6,0,4,0,0,0,0,3,0,1],
+									[1,0,4,0,0,6,0,0,3,0,6,6,0,0,0,0,3,0,3,4,0,0,4,0,0,0,0,0,0,0,0,0,3,0,0,4,0,6,0,1],
+									[1,0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,6,3,0,0,3,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,3,1],
 									[1,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
-									[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-									[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-									[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-									[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-									[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-									[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+									[1,6,3,0,0,0,0,0,0,0,0,0,3,0,0,0,4,0,0,0,0,3,0,0,0,0,0,3,0,0,0,3,0,0,0,0,0,0,0,1],
+									[1,6,3,0,0,0,0,0,0,0,0,0,6,3,0,0,3,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,3,0,3,3,0,0,0,1],
+									[1,0,6,0,0,3,0,0,0,0,0,0,0,0,3,0,0,0,0,0,3,0,6,6,0,0,0,0,4,0,0,0,3,0,3,3,0,0,0,1],
+									[1,0,0,0,0,3,4,0,0,3,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,3,0,3,4,0,0,0,0,0,0,3,0,0,0,1],
+									[1,0,0,0,6,0,0,3,0,6,0,0,3,0,3,3,0,0,0,0,0,0,0,0,0,3,0,3,4,0,0,0,0,0,0,6,0,0,3,1],
+									[1,0,4,0,0,0,0,6,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,6,0,3,0,0,3,0,0,0,0,3,0,0,0,3,0,1],
 									[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]];
 
+		public var artTiles:Array = [[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+									[1,0,0,0,0,0,0,6,0,0,4,0,3,6,0,0,0,0,0,3,0,3,0,0,0,0,0,0,0,6,0,0,0,0,3,0,0,0,0,1],
+									[1,0,3,6,3,0,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,3,4,0,0,3,0,0,0,0,6,0,0,0,0,0,0,0,0,1],
+									[1,0,0,0,0,0,0,0,0,0,0,6,0,0,3,0,0,0,0,0,3,0,3,0,0,3,0,0,0,0,0,0,0,0,3,0,0,0,0,1],
+									[1,3,0,3,3,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,3,0,0,3,0,0,0,0,3,0,0,0,3,0,0,0,0,0,1],
+									[1,3,0,6,3,0,0,0,0,0,0,0,0,0,6,3,0,0,3,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,3,0,3,3,0,1],
+									[1,0,0,0,6,0,0,3,0,0,0,0,0,0,0,0,3,0,0,0,0,0,3,0,6,3,0,0,0,0,0,0,0,0,3,0,3,3,0,1],
+									[1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,3,0,0,3,0,1],
+									[1,0,6,0,0,0,3,0,0,4,6,0,0,3,6,3,0,0,0,0,0,0,0,0,0,0,0,4,0,3,4,0,0,0,0,0,0,6,0,1],
+									[1,0,0,4,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,6,3,0,0,3,0,0,0,0,0,0,0,0,1],
+									[1,0,0,0,3,0,0,3,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,3,6,0,0,3,0,0,3,0,0,0,0,0,0,0,0,1],
+									[1,0,3,0,0,0,0,0,3,0,0,0,0,0,0,0,3,3,3,0,0,0,0,0,0,0,0,3,0,0,6,0,4,0,0,0,0,3,0,1],
+									[1,0,4,0,0,6,0,0,3,0,6,6,0,0,0,0,3,0,3,4,0,0,4,0,0,0,0,0,0,0,0,0,3,0,0,4,0,6,0,1],
+									[1,0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,6,3,0,0,3,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,3,1],
+									[1,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+									[1,6,3,0,0,0,0,0,0,0,0,0,3,0,0,0,4,0,0,0,0,3,0,0,0,0,0,3,0,0,0,3,0,0,0,0,0,0,0,1],
+									[1,6,3,0,0,0,0,0,0,0,0,0,6,3,0,0,3,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,3,0,3,3,0,0,0,1],
+									[1,0,6,0,0,3,0,0,0,0,0,0,0,0,3,0,0,0,0,0,3,0,6,6,0,0,0,0,4,0,0,0,3,0,3,3,0,0,0,1],
+									[1,0,0,0,0,3,4,0,0,3,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,3,0,3,4,0,0,0,0,0,0,3,0,0,0,1],
+									[1,0,0,0,6,0,0,3,0,6,0,0,3,0,3,3,0,0,0,0,0,0,0,0,0,3,0,3,4,0,0,0,0,0,0,6,0,0,3,1],
+									[1,0,4,0,0,0,0,6,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,6,0,3,0,0,3,0,0,0,0,3,0,0,0,3,0,1],
+									[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]];
+									
+
+		public var _player:Player;
+		private var _dirt:Dirt;
+		private var _wall:Wall;
+		private var _wall2:Wall2;
+		private var _stone:StoneBall;
+		private var _diamond:Diamond;
+		
+		private var indexX:uint;
+		private var indexY:uint;
+		private var _movementX:int;
+		private var _movementY:Number = 34;
+		public var score:uint = 0;
+		private var _zero:String = "0";
+		
+		private var _header:Header;
+		
+		private var  _diamondCounter:TextField;
+		private var tf:TextFormat;
 		
 									
 		/*private var _map:Array;
@@ -60,23 +112,20 @@ package Game
 		
 		public function Game(s:Stage) 
 		{
+			
+			tf = new TextFormat("Commodore 64 Pixelized Regular", 34, 0xeff225, true); // variable voor de text style.
+			//tf2 = new TextFormat("Commodore 64 Pixelized Regular", 34, 0xeff225, true); // variable voor de text style.
+			
 			_grid = new Sprite();
 			_grid.graphics.clear();
 			_grid.graphics.lineStyle(1, 0xffffff);
 			
-			//_player = new Player();
-			
-			/*_stone = new Stone();
-			_wall = new Wall();
-			_wall2 = new Wall2();
-			_diamond = new Diamond();
-			_dirt = new Dirt();*/
 			
 			
-				//trace(_mapData);
-        for (var row:Number = 0; row < numColumns; row++)
+				//trace(mapData);
+        for (row = 0; row < numRows; row++)  // Grid
         {
-            for (var col:Number = 0; col < numRows; col++)
+            for (col = 0; col < numColumns; col++)
             {
                // trace(col, row);
                 _grid.graphics.moveTo(col * cellWidth, 0);
@@ -85,66 +134,195 @@ package Game
                 _grid.graphics.lineTo(cellWidth * numColumns, row * cellHeight);
 				addChild(_grid);
 				_grid.y = 34;
-				if (_mapData[row][col] == 0) 
+				
+				if (mapData[row][col] == 0) 
 				{
-					var dirt = new Dirt();
-					addChild(dirt);
-					dirt.x = col * cellWidth  + 17;
-					dirt.y = row * cellHeight  + 17 + 34;
-					dirt.width = cellWidth;
-					dirt.height = cellHeight;
+					_dirt = new Dirt();
+					artTiles[row][col] = _dirt;
+					addChild(_dirt);
+					_dirt.x = col * cellWidth  + 17 + _movementX;
+					_dirt.y = row * cellHeight + 17 + _movementY;
+					_dirt.width = cellWidth;
+					_dirt.height = cellHeight;
 				}
-				if (_mapData[row][col] == 1) 
+				else if (mapData[row][col] == 1) 
 				{
-					var wall = new Wall();
-					addChild(wall);
-					wall.x = col * cellWidth  + 17;
-					wall.y = row * cellHeight + 17 + 34;
-					wall.width = cellWidth;
-					wall.height = cellHeight;
+					_wall = new Wall();
+					artTiles[row][col] = _wall;
+					addChild(_wall);
+					_wall.x = col * cellWidth  + 17 + _movementX;
+					_wall.y = row * cellHeight + 17 + _movementY;
+					_wall.width = cellWidth;
+					_wall.height = cellHeight;
 				}
-				if (_mapData[row][col] == 2) 
+				else if (mapData[row][col] == 2) 
 				{
-					var wall2 = new Wall2();
-					addChild(wall2);
-					wall2.x = col * cellWidth  + 17;
-					wall2.y = row * cellHeight + 17 + 34;
-					wall2.width = cellWidth;
-					wall2.height = cellHeight;
+					_wall2 = new Wall2();
+					artTiles[row][col] = _wall2;
+					addChild(_wall2);
+					_wall2.x = col * cellWidth  + 17 + _movementX;
+					_wall2.y = row * cellHeight + 17 + _movementY;
+					_wall2.width = cellWidth;
+					_wall2.height = cellHeight;
 				}
-				if (_mapData[row][col] == 3) 
+				else if (mapData[row][col] == 3) 
 				{
-					var stone = new Stone();
-					addChild(stone);
-					stone.x = col * cellWidth + 17;
-					stone.y = row * cellHeight + 17 + 34;
-					stone.width = cellWidth;
-					stone.height = cellHeight;
+					_stone = new StoneBall();
+					artTiles[row][col] = _stone;
+					addChild(_stone);
+					_stone.x = col * cellWidth + 17  + _movementX;
+					_stone.y = row * cellHeight + 17 + _movementY;
+					_stone.width = cellWidth;
+					_stone.height = cellHeight;
 				}
-				if (_mapData[row][col] == 4) 
+				else if (mapData[row][col] == 4) 
 				{
-					var diamond = new Diamond();
-					addChild(diamond);
-					diamond.x = col * cellWidth + 17;
-					diamond.y = row * cellHeight + 17 + 34;
-					diamond.width = cellWidth;
-					diamond.height = cellHeight;
-				}
-				if (_mapData[row][col] == 5) 
-				{
-					var player = new Player();
-					addChild(player);
-					player.x = col * cellWidth + 17 ;
-					player.y = row * cellHeight + 17 + 34;
-					player.width = cellWidth;
-					player.height = cellHeight;
+					_diamond = new Diamond();
+					artTiles[row][col] = _diamond;
+					addChild(_diamond);
+					_diamond.x = col * cellWidth + 17 + _movementX;
+					_diamond.y = row * cellHeight + 17 + _movementY;
+					_diamond.width = cellWidth;
+					_diamond.height = cellHeight;
 				}
 				
             }
         
 			
 		}
+			_player = new Player();
+			_player.x = cellWidth * 3 + 17;
+			_player.y = cellHeight * 3 + 17;
+			_player.width = cellWidth;
+			_player.height = cellHeight;
+			addChild(_player);
+			
+			_header = new Header();
+			addChild(_header);
+			
+			_diamondCounter = new TextField();
+			addChild(_diamondCounter);
+			_diamondCounter.text = "" + _zero + score;
+			_diamondCounter.x = 10;
+			_diamondCounter.width = _diamondCounter.textWidth + 50; // maximale grootte text
+			_diamondCounter.setTextFormat(tf);
+			
+			_player.addEventListener(Event.ENTER_FRAME, update, false, 0, true);
+			
+			s.addEventListener(KeyboardEvent.KEY_DOWN, keyDown, false, 0, true);
+			s.addEventListener(KeyboardEvent.KEY_UP, keyUp, false, 0, true);
+			
+			s.addEventListener(Event.ENTER_FRAME, camera, false, 0, true);
+			
+		}										
+
+//////////////////////////////////////////////////////// UPDATE/LOOP \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ 
+
+		private function update(e:Event):void 
+		{
+			
+			trace(_movementY);
+			
+			indexX = Math.floor(_player.x / 34);
+			indexY = Math.floor(_player.y / 34);
+			
+			if (score == 10) 
+			{
+				_zero = "";
+			}
+			//trace(indexX + " " + indexY);
+			//trace(artTiles[indexY - 1][indexX]);
+			//trace(mapData[indexY - 1][indexX]);
+			
+			if (mapData[indexY - 1][indexX] == 0)
+			{
+				removeChild(artTiles[indexY - 1][indexX]);
+				mapData[indexY - 1][indexX] = 6;
+			}
+			if (mapData[indexY - 1][indexX] == 4)
+			{
+				removeChild(artTiles[indexY - 1][indexX]);
+				mapData[indexY - 1][indexX] = 6;
+				score += 1;
+				trace(score);
+				
+				
+				_diamondCounter.text = "" + _zero + score;
+				_diamondCounter.x = 10; // text positie x
+				_diamondCounter.setTextFormat(tf);
+				//_header.gainedDaimonds.text = "" + score;
+			}
+			
+			if (mapData[indexY - 1][indexX] == 1)
+			{
+				_player.y += 34;
+			}
+			
+		}
 		
+//////////////////////////////////////////////////////// KEYBOARD EVENTS \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ 
+
+		
+		private function keyUp(e:KeyboardEvent):void 
+		{
+			if (e.keyCode == 37 || e.keyCode == 38 || e.keyCode == 39 || e.keyCode == 40) 
+			{
+				_player.y -= 0;
+			}
+			//trace("X " + _movementX + " - " + "Y " + _movementY);
+		}
+		
+		private function keyDown(e:KeyboardEvent):void 
+		{
+			//trace(e.keyCode); // up:38, down:40,right:39,left:37
+			
+			if (e.keyCode == 38) // KEY UP!
+			{
+				_player.y -= 34;
+				_movementY -= 34;
+				
+				//movement();
+				
+			}
+			if (e.keyCode == 40) // KEY DOWN!
+			{
+				_player.y += 34;
+				_movementY += 34;
+				//movement();
+			}
+			if (e.keyCode == 39) // KEY RIGHT!
+			{
+				_player.x += 34;
+				_movementX += 34;
+			}
+			if (e.keyCode == 37) // KEY LEFT!
+			{
+				_player.x -= 34;
+				_movementX -= 34;
+			}
+		}
+		
+		private function camera(e:Event):void
+		{
+			root.scrollRect = new Rectangle(_player.x - 119, _player.y - 119, stage.stageWidth, stage.stageHeight);
+		
+		}
+		
+	
+		
+	}
+
+}
+
+//////////////////////////////////////////////////////// ERRORS maar nieuwe oplossing  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ 
+
+		
+			/*_stone = new Stone();
+			_wall = new Wall();
+			_wall2 = new Wall2();
+			_diamond = new Diamond();*/
+			//artTiles = new Array();
+			//_dirt = new Array;
 		
 		/*_map = new Array(21);
 			_map[0] = 	[_wall, _wall, _wall, _wall, _wall, _wall, _wall, _wall, _wall, _wall, _wall, _wall, _wall, _wall, _wall, _wall, _wall, _wall, _wall, _wall, _wall, _wall, _wall, _wall, _wall, _wall, _wall, _wall, _wall, _wall, _wall, _wall, _wall, _wall, _wall, _wall, _wall, _wall, _wall, _wall]; //row1
@@ -181,8 +359,3 @@ package Game
 			}       */                                 // ik probeerde dit na uitleg van Jelle bij wiskunde, dit werkte niet het spawnde telkens 1 object. 
 													//ik heb op stack overflow gevraagt hoe ik dit kon oplossen en kwam zo op de volgende oplossing
 													// bedankt erwin
-			
-		}
-	}
-
-}

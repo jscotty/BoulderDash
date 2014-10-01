@@ -3,6 +3,7 @@ package
 	import flash.display.Sprite;
 	import flash.display.Stage;
 	import flash.events.Event;
+	import flash.events.KeyboardEvent;
 	import Game.Game;
 	import Menu.Menu;
 	import PreLoader.PreLoader;
@@ -47,10 +48,18 @@ package
 		
 		private function openGame(e:Event):void
 		{
-			removeChild(_mainMenu);
+			
 			trace("Game");
 			_game = new Game(stage);
 			addChild(_game);
+			
+			
+			_mainMenu.removeEventListener(KeyboardEvent.KEY_DOWN, _mainMenu.keyDown);
+			_mainMenu.removeEventListener("startGame" , openGame);
+			removeChild(_mainMenu);
+			_mainMenu = null;
+			
+			
 		}
 		
 	}
