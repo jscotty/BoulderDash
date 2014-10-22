@@ -6,7 +6,7 @@
     <movie input="" />
     <movie path="bin\boulderdash.swf" />
     <movie fps="30" />
-    <movie width="672" />
+    <movie width="670" />
     <movie height="412" />
     <movie version="11" />
     <movie minorVersion="9" />

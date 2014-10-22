@@ -9,6 +9,8 @@ package Game
 	import flash.text.TextField;
 	import flash.text.TextFormat;
 	import Game.Objects.Dirt;
+	import Game.Objects.Stone;
+	import Game.Objects.StoneHandler;
 	import Game.Player.Character;
 	import flash.geom.Rectangle;
 	/**
@@ -33,7 +35,7 @@ package Game
 		private var row:Number;
 		private var col:Number;
 		
-		public var mapData:Array = [ //0 = dirt, 1 = wall, 2 = wall2 (same as wall but other texture), 3 = stones, 4 = diamonds, 5 = player, 6 = nothing
+		public static var mapData:Array = [ //0 = dirt, 1 = wall, 2 = wall2 (same as wall but other texture), 3 = stones, 4 = diamonds, 5 = player, 6 = nothing
 									[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
 									[1,0,0,0,0,0,0,6,0,0,4,0,3,6,0,0,0,0,0,3,0,3,0,0,0,0,0,0,0,6,0,0,0,0,3,0,0,0,0,1],
 									[1,0,3,6,3,0,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,3,4,0,0,3,0,0,0,0,6,0,0,0,0,0,0,0,0,1],
@@ -57,7 +59,7 @@ package Game
 									[1,0,4,0,0,0,0,6,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,6,0,3,0,0,3,0,0,0,0,3,0,0,0,3,0,1],
 									[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]];
 
-		public var artTiles:Array = [[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+		public static var artTiles:Array = [[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
 									[1,0,0,0,0,0,0,6,0,0,4,0,3,6,0,0,0,0,0,3,0,3,0,0,0,0,0,0,0,6,0,0,0,0,3,0,0,0,0,1],
 									[1,0,3,6,3,0,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,3,4,0,0,3,0,0,0,0,6,0,0,0,0,0,0,0,0,1],
 									[1,0,0,0,0,0,0,0,0,0,0,6,0,0,3,0,0,0,0,0,3,0,3,0,0,3,0,0,0,0,0,0,0,0,3,0,0,0,0,1],
@@ -81,24 +83,34 @@ package Game
 									[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]];
 									
 
-		public var _player:Player;
+		public var _player:Character;
 		private var _dirt:Dirt;
 		private var _wall:Wall;
 		private var _wall2:Wall2;
-		private var _stone:StoneBall;
+		private var _stone:Stone;
 		private var _diamond:Diamond;
 		
 		private var indexX:uint;
 		private var indexY:uint;
+		
+		private var indexStoneX:uint;
+		private var indexStoneY:uint;
+		
 		private var _movementX:int;
 		private var _movementY:Number = 34;
 		public var score:uint = 0;
 		private var _zero:String = "0";
 		
+		public var moving:Boolean = false;
+		
+		private var _stoneHandler:StoneHandler;
+		
 		private var _header:Header;
 		
 		private var  _diamondCounter:TextField;
 		private var tf:TextFormat;
+		
+		private var _startCoutner:uint;
 		
 									
 		/*private var _map:Array;
@@ -112,7 +124,6 @@ package Game
 		
 		public function Game(s:Stage) 
 		{
-			
 			tf = new TextFormat("Commodore 64 Pixelized Regular", 34, 0xeff225, true); // variable voor de text style.
 			//tf2 = new TextFormat("Commodore 64 Pixelized Regular", 34, 0xeff225, true); // variable voor de text style.
 			
@@ -127,13 +138,7 @@ package Game
         {
             for (col = 0; col < numColumns; col++)
             {
-               // trace(col, row);
-                _grid.graphics.moveTo(col * cellWidth, 0);
-                _grid.graphics.lineTo(col * cellWidth, cellHeight * numRows);
-                _grid.graphics.moveTo(0, row * cellHeight);
-                _grid.graphics.lineTo(cellWidth * numColumns, row * cellHeight);
-				addChild(_grid);
-				_grid.y = 34;
+              
 				
 				if (mapData[row][col] == 0) 
 				{
@@ -167,7 +172,7 @@ package Game
 				}
 				else if (mapData[row][col] == 3) 
 				{
-					_stone = new StoneBall();
+					_stone = new Stone();
 					artTiles[row][col] = _stone;
 					addChild(_stone);
 					_stone.x = col * cellWidth + 17  + _movementX;
@@ -190,41 +195,52 @@ package Game
         
 			
 		}
-			_player = new Player();
+			_player = new Character();
 			_player.x = cellWidth * 3 + 17;
 			_player.y = cellHeight * 3 + 17;
 			_player.width = cellWidth;
 			_player.height = cellHeight;
+			_player.anim(0);
 			addChild(_player);
 			
 			_header = new Header();
+			_header.x = 0;
+			_header.y = 0;
 			addChild(_header);
 			
 			_diamondCounter = new TextField();
 			addChild(_diamondCounter);
 			_diamondCounter.text = "" + _zero + score;
-			_diamondCounter.x = 10;
+			_diamondCounter.x = 200;
 			_diamondCounter.width = _diamondCounter.textWidth + 50; // maximale grootte text
 			_diamondCounter.setTextFormat(tf);
 			
 			_player.addEventListener(Event.ENTER_FRAME, update, false, 0, true);
 			
-			s.addEventListener(KeyboardEvent.KEY_DOWN, keyDown, false, 0, true);
-			s.addEventListener(KeyboardEvent.KEY_UP, keyUp, false, 0, true);
+			addEventListener(Event.ENTER_FRAME, camera);
 			
-			s.addEventListener(Event.ENTER_FRAME, camera, false, 0, true);
-			
+			_stoneHandler = new StoneHandler();
+			addChild(_stoneHandler);
 		}										
 
 //////////////////////////////////////////////////////// UPDATE/LOOP \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ 
 
 		private function update(e:Event):void 
 		{
+			_startCoutner += 1;
 			
-			trace(_movementY);
+			if (_startCoutner >= 80) {
+					stage.addEventListener(KeyboardEvent.KEY_DOWN, keyDown, false, 0, true);
+					stage.addEventListener(KeyboardEvent.KEY_UP, keyUp, false, 0, true);
+				}
+			//trace(_movementY);
 			
 			indexX = Math.floor(_player.x / 34);
 			indexY = Math.floor(_player.y / 34);
+			
+			indexStoneX = Math.floor(_stone.x / 34);
+			indexStoneY = Math.floor(_stone.y / 34);
+			
 			
 			if (score == 10) 
 			{
@@ -232,7 +248,6 @@ package Game
 			}
 			//trace(indexX + " " + indexY);
 			//trace(artTiles[indexY - 1][indexX]);
-			//trace(mapData[indexY - 1][indexX]);
 			
 			if (mapData[indexY - 1][indexX] == 0)
 			{
@@ -244,12 +259,12 @@ package Game
 				removeChild(artTiles[indexY - 1][indexX]);
 				mapData[indexY - 1][indexX] = 6;
 				score += 1;
-				trace(score);
+				//trace(score);
 				
 				
 				_diamondCounter.text = "" + _zero + score;
-				_diamondCounter.x = 10; // text positie x
 				_diamondCounter.setTextFormat(tf);
+				_diamondCounter.embedFonts;
 				//_header.gainedDaimonds.text = "" + score;
 			}
 			
@@ -257,6 +272,17 @@ package Game
 			{
 				_player.y += 34;
 			}
+			if (mapData[indexStoneY][indexStoneX] == 6)
+			{
+				artTiles[indexStoneY - 1 ][indexStoneX].y -= 34;
+			}
+			//trace(mapData[indexStoneY][indexStoneX]);
+			
+			var _playX1:int = 629;
+			//trace(_playX1);
+			
+			
+			
 			
 		}
 		
@@ -268,6 +294,7 @@ package Game
 			if (e.keyCode == 37 || e.keyCode == 38 || e.keyCode == 39 || e.keyCode == 40) 
 			{
 				_player.y -= 0;
+				_player.anim(1);
 			}
 			//trace("X " + _movementX + " - " + "Y " + _movementY);
 		}
@@ -280,25 +307,54 @@ package Game
 			{
 				_player.y -= 34;
 				_movementY -= 34;
+				_player.anim(2);
+				
+				_header.y -= 34;
+				_diamondCounter.y -= 34;
+				
 				
 				//movement();
+				_stoneHandler = new StoneHandler();
+				addChild(_stoneHandler);
 				
 			}
 			if (e.keyCode == 40) // KEY DOWN!
 			{
 				_player.y += 34;
 				_movementY += 34;
+				_player.anim(2);
+				
+				_header.y += 34;
+				_diamondCounter.y += 34;
 				//movement();
+				_stoneHandler = new StoneHandler();
+				addChild(_stoneHandler);
 			}
 			if (e.keyCode == 39) // KEY RIGHT!
 			{
 				_player.x += 34;
 				_movementX += 34;
+				_player.anim(2);
+				_player.scaleX = 1;
+				
+				_header.x += 34;
+				_diamondCounter.x += 34;
+				
+				_stoneHandler = new StoneHandler();
+				addChild(_stoneHandler);
 			}
 			if (e.keyCode == 37) // KEY LEFT!
 			{
 				_player.x -= 34;
 				_movementX -= 34;
+				_player.anim(2);
+				_player.scaleX = -1;
+				
+				_header.x -= 34;
+				_diamondCounter.x -= 34;
+				
+				_stoneHandler = new StoneHandler();
+				addChild(_stoneHandler);
 			}
 		}
 		
@@ -307,9 +363,11 @@ package Game
 			root.scrollRect = new Rectangle(_player.x - 119, _player.y - 119, stage.stageWidth, stage.stageHeight);
 		
 		}
+		private function cameraTwo(e:Event):void
+		{
+			root.scrollRect = new Rectangle(_player.x - 578, _player.y - 119, stage.stageWidth, stage.stageHeight);
 		
-	
-		
+		}
 	}
 
 }
