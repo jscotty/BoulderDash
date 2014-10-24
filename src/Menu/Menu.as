@@ -5,6 +5,9 @@ package Menu
 	import flash.events.Event;
 	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
+	import flash.media.Sound;
+	import flash.media.SoundChannel;
+	import flash.net.URLRequest;
 	import flash.text.TextField;
 	import flash.text.TextFormat;
 	
@@ -19,8 +22,17 @@ package Menu
 		private var _background:MenuBG;
 		private var _backgroundWall:BgMenuWall;
 		
+		private var _sound:Sound;
+		private var _soundChannel:SoundChannel;
+		
 		public function Menu(s:Stage) 
 		{
+			_sound = new Sound;
+			_soundChannel = new SoundChannel;
+			
+			_sound.load(new URLRequest("theme.mp3"));
+			_soundChannel = _sound.play(0, 99999);
+			
 			_backgroundWall = new BgMenuWall();
 			addChild(_backgroundWall);
 			
@@ -51,6 +63,7 @@ package Menu
 		public function keyDown(e:KeyboardEvent):void
 		{   
 			dispatchEvent(new Event("startGame"));
+			_soundChannel.stop();
 		}
 		
 		/*private function onClick(e:MouseEvent):void

@@ -19,6 +19,8 @@ package
 		private var _preLoader:PreLoader;
 		private var _game:Game;
 		
+		public static var level:int = 2;
+		
 		public function Main():void 
 		{
 			if (stage) init();

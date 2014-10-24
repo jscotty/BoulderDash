@@ -30,6 +30,8 @@ package Game
 			_diamond.x = 20 + i * 30;
 			_diamond.y = 20;
 			addChild(_diamond);
+			_diamond.scaleX = 2;
+			_diamond.scaleY = 2;
 			}
 			
 			var tf:TextFormat = new TextFormat("Commodore 64 Pixelized Regular", 34, 0xffffff,true); // variable voor de text style.

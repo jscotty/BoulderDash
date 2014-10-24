@@ -1,11 +1,15 @@
 package Game 
 {
+	import flash.display.MovieClip;
 	import flash.display.Sprite;
 	import flash.display.Stage;
 	import flash.events.Event;
 	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
+	import flash.media.Sound;
+	import flash.media.SoundChannel;
 	import flash.net.getClassByAlias;
+	import flash.net.URLRequest;
 	import flash.text.TextField;
 	import flash.text.TextFormat;
 	import Game.Objects.Dirt;
@@ -35,7 +39,7 @@ package Game
 		private var row:Number;
 		private var col:Number;
 		
-		public static var mapData:Array = [ //0 = dirt, 1 = wall, 2 = wall2 (same as wall but other texture), 3 = stones, 4 = diamonds, 5 = player, 6 = nothing
+		public static var mapData:Array = [ //0 = dirt, 1 = wall, 2 = wall2 (same as wall but other texture), 3 = stones, 4 = diamonds, 5 = player, 6 = nothing, 7 end
 									[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
 									[1,0,0,0,0,0,0,6,0,0,4,0,3,6,0,0,0,0,0,3,0,3,0,0,0,0,0,0,0,6,0,0,0,0,3,0,0,0,0,1],
 									[1,0,3,6,3,0,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,3,4,0,0,3,0,0,0,0,6,0,0,0,0,0,0,0,0,1],
@@ -53,7 +57,7 @@ package Game
 									[1,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
 									[1,6,3,0,0,0,0,0,0,0,0,0,3,0,0,0,4,0,0,0,0,3,0,0,0,0,0,3,0,0,0,3,0,0,0,0,0,0,0,1],
 									[1,6,3,0,0,0,0,0,0,0,0,0,6,3,0,0,3,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,3,0,3,3,0,0,0,1],
-									[1,0,6,0,0,3,0,0,0,0,0,0,0,0,3,0,0,0,0,0,3,0,6,6,0,0,0,0,4,0,0,0,3,0,3,3,0,0,0,1],
+									[1,0,6,0,0,3,0,0,0,0,0,0,0,0,3,0,0,0,0,0,3,0,6,6,0,0,0,0,4,0,0,0,3,0,3,3,0,0,7,1],
 									[1,0,0,0,0,3,4,0,0,3,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,3,0,3,4,0,0,0,0,0,0,3,0,0,0,1],
 									[1,0,0,0,6,0,0,3,0,6,0,0,3,0,3,3,0,0,0,0,0,0,0,0,0,3,0,3,4,0,0,0,0,0,0,6,0,0,3,1],
 									[1,0,4,0,0,0,0,6,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,6,0,3,0,0,3,0,0,0,0,3,0,0,0,3,0,1],
@@ -76,17 +80,66 @@ package Game
 									[1,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
 									[1,6,3,0,0,0,0,0,0,0,0,0,3,0,0,0,4,0,0,0,0,3,0,0,0,0,0,3,0,0,0,3,0,0,0,0,0,0,0,1],
 									[1,6,3,0,0,0,0,0,0,0,0,0,6,3,0,0,3,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,3,0,3,3,0,0,0,1],
-									[1,0,6,0,0,3,0,0,0,0,0,0,0,0,3,0,0,0,0,0,3,0,6,6,0,0,0,0,4,0,0,0,3,0,3,3,0,0,0,1],
+									[1,0,6,0,0,3,0,0,0,0,0,0,0,0,3,0,0,0,0,0,3,0,6,6,0,0,0,0,4,0,0,0,3,0,3,3,0,0,7,1],
 									[1,0,0,0,0,3,4,0,0,3,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,3,0,3,4,0,0,0,0,0,0,3,0,0,0,1],
 									[1,0,0,0,6,0,0,3,0,6,0,0,3,0,3,3,0,0,0,0,0,0,0,0,0,3,0,3,4,0,0,0,0,0,0,6,0,0,3,1],
 									[1,0,4,0,0,0,0,6,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,6,0,3,0,0,3,0,0,0,0,3,0,0,0,3,0,1],
 									[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]];
 									
+		public static var mapData2:Array = [ //0 = dirt, 1 = wall, 2 = wall2 (same as wall but other texture), 3 = stones, 4 = diamonds, 5 = player, 6 = nothing, 7 end, 8 enemie
+									[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+									[1,0,3,0,0,3,0,0,2,0,3,0,0,0,4,0,2,0,0,0,6,0,3,0,2,3,0,0,0,0,0,0,2,0,0,3,3,0,0,1],
+									[1,0,0,0,0,0,0,0,2,0,0,0,0,0,0,3,2,3,3,0,6,0,0,0,2,6,0,0,4,0,0,0,2,0,0,0,0,3,0,1],
+									[1,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,1],
+									[1,4,0,0,0,0,0,0,2,0,3,0,0,0,0,3,2,0,3,0,6,0,0,6,2,0,0,3,0,0,4,0,2,0,0,3,0,3,0,1],
+									[1,0,0,0,0,0,0,0,2,0,3,0,0,0,0,3,2,0,3,0,6,3,0,0,2,0,0,0,0,0,3,0,2,0,0,0,6,0,0,1],
+									[1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,6,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+									[1,0,0,0,0,3,3,0,2,0,0,3,0,0,0,0,2,0,0,0,6,0,0,3,2,0,0,0,0,3,0,0,2,0,0,0,0,0,3,1],
+									[1,0,0,0,0,0,0,0,2,0,0,6,0,0,0,0,2,0,0,0,6,0,0,0,2,0,0,0,0,3,0,6,2,0,0,0,0,0,3,1],
+									[1,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,1],
+									[1,3,0,0,3,0,0,0,2,0,0,0,0,3,0,0,2,0,0,3,6,0,0,0,2,0,0,0,0,0,0,4,2,3,0,0,0,0,0,1],
+									[1,3,0,0,0,0,3,0,2,0,0,3,0,0,3,0,2,0,0,0,6,0,6,3,2,0,0,0,0,0,0,0,2,3,0,0,0,3,0,1],
+									[1,0,3,0,0,0,0,0,2,0,0,0,3,0,0,0,2,0,0,0,6,0,6,3,2,0,0,0,0,0,0,0,2,6,3,0,0,3,0,1],
+									[1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,6,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+									[1,3,0,6,6,8,0,0,2,0,0,0,0,3,0,3,2,0,0,0,6,0,0,0,2,0,3,4,0,0,3,0,2,0,0,0,0,0,0,1],
+									[1,0,0,0,0,0,3,0,2,3,0,0,0,0,0,0,2,0,0,4,6,0,0,0,2,6,0,0,3,0,0,0,2,0,3,0,3,3,0,1],
+									[1,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,1],
+									[1,4,0,0,6,0,3,0,2,3,0,0,0,0,3,0,2,0,3,0,6,0,0,3,2,0,3,0,3,0,0,0,2,0,0,0,0,0,0,1],
+									[1,0,0,0,0,0,3,0,2,3,0,0,4,0,0,0,2,0,0,0,6,3,0,0,2,0,0,3,0,0,0,0,2,0,0,0,3,3,6,1],
+									[1,0,4,0,0,0,6,3,2,0,0,3,0,0,0,0,2,0,5,4,6,3,0,0,2,0,6,0,0,0,0,0,2,0,0,0,3,3,6,1],
+									[1,0,3,0,0,0,0,6,2,0,0,2,0,0,3,0,2,0,7,0,6,0,0,0,2,0,0,0,0,3,0,3,2,0,0,0,0,6,3,1],
+									[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]];
+									
+		public static var artTiles2:Array = [ //0 = dirt, 1 = wall, 2 = wall2 (same as wall but other texture), 3 = stones, 4 = diamonds, 5 = player, 6 = nothing
+									[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+									[1,0,3,0,0,3,0,0,2,0,3,0,0,0,4,0,2,0,0,0,6,0,3,0,2,3,0,0,0,0,0,0,2,0,0,3,3,0,0,1],
+									[1,0,0,0,0,0,0,0,2,0,0,0,0,0,0,3,2,3,3,0,6,0,0,0,2,6,0,0,4,0,0,0,2,0,0,0,0,3,0,1],
+									[1,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,1],
+									[1,4,0,0,0,0,0,0,2,0,3,0,0,0,0,3,2,0,3,0,6,0,0,6,2,0,0,3,0,0,4,0,2,0,0,3,0,3,0,1],
+									[1,0,0,0,0,0,0,0,2,0,3,0,0,0,0,3,2,0,3,0,6,3,0,0,2,0,0,0,0,0,3,0,2,0,0,0,6,0,0,1],
+									[1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,6,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+									[1,0,0,0,0,3,3,0,2,0,0,3,0,0,0,0,2,0,0,0,6,0,0,3,2,0,0,0,0,3,0,0,2,0,0,0,0,0,3,1],
+									[1,0,0,0,0,0,0,0,2,0,0,6,0,0,0,0,2,0,0,0,6,0,0,0,2,0,0,0,0,3,0,6,2,0,0,0,0,0,3,1],
+									[1,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,1],
+									[1,3,0,0,3,0,0,0,2,0,0,0,0,3,0,0,2,0,0,3,6,0,0,0,2,0,0,0,0,0,0,4,2,3,0,0,0,0,0,1],
+									[1,3,0,0,0,0,3,0,2,0,0,3,0,0,3,0,2,0,0,0,6,0,6,3,2,0,0,0,0,0,0,0,2,3,0,0,0,3,0,1],
+									[1,0,3,0,0,0,0,0,2,0,0,0,3,0,0,0,2,0,0,0,6,0,6,3,2,0,0,0,0,0,0,0,2,6,3,0,0,3,0,1],
+									[1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,6,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+									[1,3,0,6,6,8,0,0,2,0,0,0,0,3,0,3,2,0,0,0,6,0,0,0,2,0,3,4,0,0,3,0,2,0,0,0,0,0,0,1],
+									[1,0,0,0,0,0,3,0,2,3,0,0,0,0,0,0,2,0,0,4,6,0,0,0,2,6,0,0,3,0,0,0,2,0,3,0,3,3,0,1],
+									[1,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,1],
+									[1,4,0,0,6,0,3,0,2,3,0,0,0,0,3,0,2,0,3,0,6,0,0,3,2,0,3,0,3,0,0,0,2,0,0,0,0,0,0,1],
+									[1,0,0,0,0,0,3,0,2,3,0,0,4,0,0,0,2,0,0,0,6,3,0,0,2,0,0,3,0,0,0,0,2,0,0,0,3,3,6,1],
+									[1,0,4,0,0,0,6,3,2,0,0,3,0,0,0,0,2,0,5,4,6,3,0,0,2,0,6,0,0,0,0,0,2,0,0,0,3,3,6,1],
+									[1,0,3,0,0,0,0,6,2,0,0,2,0,0,3,0,2,0,7,0,6,0,0,0,2,0,0,0,0,3,0,3,2,0,0,0,0,6,3,1],
+									[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]];
+
+		
 
 		public var _player:Character;
 		private var _dirt:Dirt;
-		private var _wall:Wall;
-		private var _wall2:Wall2;
+		private var _wall:MovieClip;
+		private var _wall2:MovieClip;
 		private var _stone:Stone;
 		private var _diamond:Diamond;
 		
@@ -95,6 +148,10 @@ package Game
 		
 		private var indexStoneX:uint;
 		private var indexStoneY:uint;
+		
+		private var _lastStepY:int;
+		private var _lastStepX:int;
+		
 		
 		private var _movementX:int;
 		private var _movementY:Number = 34;
@@ -112,27 +169,43 @@ package Game
 		
 		private var _startCoutner:uint;
 		
-									
-		/*private var _map:Array;
-			private var _stone:Stone;
-			private var _wall:Wall;
-			private var _wall2:Wall2;
-			private var _diamond:Diamond;
-			private var _dirt:Dirt;
-			private var _player:Player;*/
-			
+		private var _end:End;
+		
+		private var _digSound:Sound;
+		private var _digChannel:SoundChannel;
+		
+		private var _collecSound:Sound;
+		private var _collectChannel:SoundChannel;
+		
+		private var _introSound:Sound;
+		private var _introChannel:SoundChannel;
+		
 		
 		public function Game(s:Stage) 
 		{
+			_digSound = new Sound;
+			_digChannel = new SoundChannel;
+			
+			_digSound.load(new URLRequest("dig.mp3"));
+			
+			_collecSound = new Sound;
+			_collectChannel = new SoundChannel;
+			
+			_collecSound.load(new URLRequest("collect.mp3"));
+			
+			_introSound = new Sound;
+			_introChannel = new SoundChannel;
+			
+			_introSound.load(new URLRequest("intro.mp3"));
+			_introChannel = _introSound.play(0, 1);
+			
 			tf = new TextFormat("Commodore 64 Pixelized Regular", 34, 0xeff225, true); // variable voor de text style.
 			//tf2 = new TextFormat("Commodore 64 Pixelized Regular", 34, 0xeff225, true); // variable voor de text style.
 			
-			_grid = new Sprite();
-			_grid.graphics.clear();
-			_grid.graphics.lineStyle(1, 0xffffff);
 			
 			
 			
+			if(Main.level == 1){
 				//trace(mapData);
         for (row = 0; row < numRows; row++)  // Grid
         {
@@ -190,11 +263,32 @@ package Game
 					_diamond.width = cellWidth;
 					_diamond.height = cellHeight;
 				}
+				else if (mapData[row][col] == 8) 
+				{
+					_end = new End();
+					artTiles[row][col] = _end;
+					addChild(_end);
+					_end.x = col * cellWidth + 17;
+					_end.y = row * cellHeight + 17;
+					_end.width = cellWidth;
+					_end.height = cellHeight;
+				}
 				
+				else if (mapData[row][col] == 7) 
+				{
+					_end = new End();
+					artTiles[row][col] = _end;
+					addChild(_end);
+					_end.x = col * cellWidth + 17;
+					_end.y = row * cellHeight + 17;
+					_end.width = cellWidth;
+					_end.height = cellHeight;
+				}
             }
-        
+			
 			
 		}
+		
 			_player = new Character();
 			_player.x = cellWidth * 3 + 17;
 			_player.y = cellHeight * 3 + 17;
@@ -211,9 +305,105 @@ package Game
 			_diamondCounter = new TextField();
 			addChild(_diamondCounter);
 			_diamondCounter.text = "" + _zero + score;
-			_diamondCounter.x = 200;
+			_diamondCounter.x = 185;
 			_diamondCounter.width = _diamondCounter.textWidth + 50; // maximale grootte text
 			_diamondCounter.setTextFormat(tf);
+			
+		} else if (Main.level == 2) {
+			 for (row = 0; row < numRows; row++)  // Grid
+        {
+            for (col = 0; col < numColumns; col++)
+            {
+              
+				
+				if (mapData2[row][col] == 0) 
+				{
+					_dirt = new Dirt();
+					artTiles2[row][col] = _dirt;
+					addChild(_dirt);
+					_dirt.x = col * cellWidth  + 17 + _movementX;
+					_dirt.y = row * cellHeight + 17 + _movementY;
+					_dirt.width = cellWidth;
+					_dirt.height = cellHeight;
+				}
+				else if (mapData2[row][col] == 1) 
+				{
+					_wall = new WallTwo();
+					artTiles2[row][col] = _wall;
+					addChild(_wall);
+					_wall.x = col * cellWidth  + 17 + _movementX;
+					_wall.y = row * cellHeight + 17 + _movementY;
+					_wall.width = cellWidth;
+					_wall.height = cellHeight;
+				}
+				else if (mapData2[row][col] == 2) 
+				{
+					_wall2 = new WallTwo2();
+					artTiles2[row][col] = _wall2;
+					addChild(_wall2);
+					_wall2.x = col * cellWidth  + 17 + _movementX;
+					_wall2.y = row * cellHeight + 17 + _movementY;
+					_wall2.width = cellWidth;
+					_wall2.height = cellHeight;
+				}
+				else if (mapData2[row][col] == 3) 
+				{
+					_stone = new Stone();
+					artTiles2[row][col] = _stone;
+					addChild(_stone);
+					_stone.x = col * cellWidth + 17  + _movementX;
+					_stone.y = row * cellHeight + 17 + _movementY;
+					_stone.width = cellWidth;
+					_stone.height = cellHeight;
+				}
+				else if (mapData2[row][col] == 4) 
+				{
+					_diamond = new Diamond();
+					artTiles2[row][col] = _diamond;
+					addChild(_diamond);
+					_diamond.x = col * cellWidth + 17 + _movementX;
+					_diamond.y = row * cellHeight + 17 + _movementY;
+					_diamond.width = cellWidth;
+					_diamond.height = cellHeight;
+				}
+				
+				else if (mapData2[row][col] == 7) 
+				{
+					_end = new End();
+					artTiles2[row][col] = _end;
+					addChild(_end);
+					_end.x = col * cellWidth + 17;
+					_end.y = row * cellHeight + 17;
+					_end.width = cellWidth;
+					_end.height = cellHeight;
+				}
+            }
+        
+			
+		}
+		
+			_player = new Character();
+			_player.x = cellWidth * 18 + 17;
+			_player.y = cellHeight * 20 + 17;
+			_player.width = cellWidth;
+			_player.height = cellHeight;
+			_player.anim(0);
+			addChild(_player);
+			
+			_header = new Header();
+			_header.x = _player.x - 330;
+			_header.y = _player.y - 289;
+			addChild(_header);
+			
+			_diamondCounter = new TextField();
+			addChild(_diamondCounter);
+			_diamondCounter.text = "" + _zero + score;
+			_diamondCounter.x = _player.x - 330 + 185;
+			_diamondCounter.y = _player.y - 289;
+			_diamondCounter.width = _diamondCounter.textWidth + 50; // maximale grootte text
+			_diamondCounter.setTextFormat(tf);
+		}
+			
 			
 			_player.addEventListener(Event.ENTER_FRAME, update, false, 0, true);
 			
@@ -242,6 +432,7 @@ package Game
 			indexStoneY = Math.floor(_stone.y / 34);
 			
 			
+			
 			if (score == 10) 
 			{
 				_zero = "";
@@ -249,18 +440,24 @@ package Game
 			//trace(indexX + " " + indexY);
 			//trace(artTiles[indexY - 1][indexX]);
 			
+			if (Main.level == 1) {
 			if (mapData[indexY - 1][indexX] == 0)
 			{
 				removeChild(artTiles[indexY - 1][indexX]);
 				mapData[indexY - 1][indexX] = 6;
+				
+				startDigEffect();
 			}
 			if (mapData[indexY - 1][indexX] == 4)
 			{
 				removeChild(artTiles[indexY - 1][indexX]);
-				mapData[indexY - 1][indexX] = 6;
+				mapData[indexY - 1][indexX] = 5;
 				score += 1;
+				
+				startCollectEffect();
 				//trace(score);
 				
+				startDigEffect();
 				
 				_diamondCounter.text = "" + _zero + score;
 				_diamondCounter.setTextFormat(tf);
@@ -270,20 +467,127 @@ package Game
 			
 			if (mapData[indexY - 1][indexX] == 1)
 			{
-				_player.y += 34;
+				_player.y = _lastStepY;
+				_player.x = _lastStepX;
+				
+				_header.y = _lastStepY - 119;
+				_header.x = _lastStepX - 119;
+				
+				_diamondCounter.y = _lastStepY - 119;
+				_diamondCounter.x = _lastStepX - 119 + 185;
+				
+			}
+			if (mapData[indexY - 1][indexX] == 2)
+			{
+				_player.y = _lastStepY;
+				_player.x = _lastStepX;
+				
+				_header.y = _lastStepY - 119;
+				_header.x = _lastStepX - 119;
+				
+				_diamondCounter.y = _lastStepY - 119;
+				_diamondCounter.x = _lastStepX - 119 + 185;
+				
+			}
+			if (mapData[indexY - 1][indexX] == 3)
+			{
+				_player.y = _lastStepY;
+				_player.x = _lastStepX;
+				
+				_header.y = _lastStepY - 119;
+				_header.x = _lastStepX - 119;
+				
+				_diamondCounter.y = _lastStepY - 119;
+				_diamondCounter.x = _lastStepX - 119 + 185;
+				
 			}
 			if (mapData[indexStoneY][indexStoneX] == 6)
 			{
 				artTiles[indexStoneY - 1 ][indexStoneX].y -= 34;
+				
 			}
 			//trace(mapData[indexStoneY][indexStoneX]);
 			
+				
+			} else if (Main.level == 2) {
+				if (mapData2[indexY - 1][indexX] == 0)
+			{
+				removeChild(artTiles2[indexY - 1][indexX]);
+				mapData2[indexY - 1][indexX] = 6;
+				
+				startDigEffect();
+			}
+			if (mapData2[indexY - 1][indexX] == 4)
+			{
+				removeChild(artTiles2[indexY - 1][indexX]);
+				mapData2[indexY - 1][indexX] = 5;
+				score += 1;
+				
+				startCollectEffect();
+				//trace(score);
+				
+				startDigEffect();
+				
+				_diamondCounter.text = "" + _zero + score;
+				_diamondCounter.setTextFormat(tf);
+				_diamondCounter.embedFonts;
+				//_header.gainedDaimonds.text = "" + score;
+			}
+			
+			if (mapData2[indexY - 1][indexX] == 1)
+			{
+				_player.y = _lastStepY;
+				_player.x = _lastStepX;
+				
+				_header.y = _lastStepY - 119;
+				_header.x = _lastStepX - 119;
+				
+				_diamondCounter.y = _lastStepY - 119;
+				_diamondCounter.x = _lastStepX - 119 + 185;
+				
+			}
+			if (mapData2[indexY - 1][indexX] == 2)
+			{
+				_player.y = _lastStepY;
+				_player.x = _lastStepX;
+				
+				_header.y = _lastStepY - 119;
+				_header.x = _lastStepX - 119;
+				
+				_diamondCounter.y = _lastStepY - 119;
+				_diamondCounter.x = _lastStepX - 119 + 185;
+				
+			}
+			if (mapData2[indexY - 1][indexX] == 3)
+			{
+				_player.y = _lastStepY;
+				_player.x = _lastStepX;
+				
+				_header.y = _lastStepY - 119;
+				_header.x = _lastStepX - 119;
+				
+				_diamondCounter.y = _lastStepY - 119;
+				_diamondCounter.x = _lastStepX - 119 + 185;
+				
+			}
+			if (mapData2[indexStoneY][indexStoneX] == 6)
+			{
+				artTiles2[indexStoneY - 1 ][indexStoneX].y -= 34;
+				
+			}
+			}
 			var _playX1:int = 629;
-			//trace(_playX1);
 			
-			
-			
-			
+		}
+		
+		private function startCollectEffect():void 
+		{
+			_collectChannel = _collecSound.play(0,1);
+		}
+		
+		private function startDigEffect():void 
+		{
+			_digChannel = _digSound.play(0,1);
 		}
 		
 //////////////////////////////////////////////////////// KEYBOARD EVENTS \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ 
@@ -297,6 +601,7 @@ package Game
 				_player.anim(1);
 			}
 			//trace("X " + _movementX + " - " + "Y " + _movementY);
+			
 		}
 		
 		private function keyDown(e:KeyboardEvent):void 
@@ -312,10 +617,16 @@ package Game
 				_header.y -= 34;
 				_diamondCounter.y -= 34;
 				
-				
 				//movement();
 				_stoneHandler = new StoneHandler();
 				addChild(_stoneHandler);
+				
+				_lastStepY = _player.y + 34;
+				_lastStepX = _player.x;
+				
+				
+				trace("X: " + _player.x + " / Y: " + _player.y);
+				trace("X: " + _lastStepX + " / Y: " + _lastStepY + "   // Last step");
 				
 			}
 			if (e.keyCode == 40) // KEY DOWN!
@@ -326,9 +637,17 @@ package Game
 				
 				_header.y += 34;
 				_diamondCounter.y += 34;
+				
+				
 				//movement();
 				_stoneHandler = new StoneHandler();
 				addChild(_stoneHandler);
+				
+				_lastStepY = _player.y - 34;
+				_lastStepX = _player.x;
+				
+				trace("X: " + _player.x + " / Y: " + _player.y);
+				trace("X: " + _lastStepX + " / Y: " + _lastStepY + "   // Last step");
 			}
 			if (e.keyCode == 39) // KEY RIGHT!
 			{
@@ -340,8 +659,15 @@ package Game
 				_header.x += 34;
 				_diamondCounter.x += 34;
 				
+				
 				_stoneHandler = new StoneHandler();
 				addChild(_stoneHandler);
+				
+				_lastStepY = _player.y;
+				_lastStepX = _player.x - 34;
+				
+				trace("X: " + _player.x + " / Y: " + _player.y);
+				trace("X: " + _lastStepX + " / Y: " + _lastStepY + "   // Last step");
 			}
 			if (e.keyCode == 37) // KEY LEFT!
 			{
@@ -353,15 +679,22 @@ package Game
 				_header.x -= 34;
 				_diamondCounter.x -= 34;
 				
+				
 				_stoneHandler = new StoneHandler();
 				addChild(_stoneHandler);
+				
+				_lastStepY = _player.y;
+				_lastStepX = _player.x + 34;
+				
+				trace("X: " + _player.x + " / Y: " + _player.y);
+				trace("X: " + _lastStepX + " / Y: " + _lastStepY + "   // Last step");
 			}
 		}
 		
 		private function camera(e:Event):void
 		{
-			root.scrollRect = new Rectangle(_player.x - 119, _player.y - 119, stage.stageWidth, stage.stageHeight);
-		
+			if(Main.level == 1) root.scrollRect = new Rectangle(_player.x - 119, _player.y - 119, stage.stageWidth, stage.stageHeight);
+			if(Main.level ==2) root.scrollRect = new Rectangle(_player.x - 323, _player.y - 289, stage.stageWidth, stage.stageHeight);
 		}
 		private function cameraTwo(e:Event):void
 		{
