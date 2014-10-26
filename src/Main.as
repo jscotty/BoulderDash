@@ -36,6 +36,7 @@ package
 			
 			_preLoader.addEventListener("LoadDone",  openMenu); // voor snelle skip zet op menu anders op adds
 			
+			
 		}
 		private function openMenu(e:Event):void
 		{
@@ -61,7 +62,26 @@ package
 			removeChild(_mainMenu);
 			_mainMenu = null;
 			
+			_game.addEventListener("done", levelUp);
 			
+			
+		}
+		
+		private function levelUp(e:Event):void 
+		{
+			_game.removeEventListener("done", levelUp);
+			removeChild(_game);
+			_game = null;
+			
+			level = 2;
+			startLevelTwo();
+		}
+		
+		private function startLevelTwo():void 
+		{
+			trace("Game Level2");
+			_game = new Game(stage);
+			addChild(_game);
 		}
 		
 	}

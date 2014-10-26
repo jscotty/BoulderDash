@@ -24,6 +24,7 @@ package Menu
 		
 		private var _sound:Sound;
 		private var _soundChannel:SoundChannel;
+		private var _border:Border;
 		
 		public function Menu(s:Stage) 
 		{
@@ -56,7 +57,10 @@ package Menu
 			addEventListener(MouseEvent.MOUSE_OVER, onHoover, false, 0, true);
 			addEventListener(MouseEvent.CLICK, onClick, false, 0, true); */
 			
-			
+			_border = new Border();
+			_border.x = 0;
+			_border.y = 1;
+			addChild(_border);
 			
 		}										
 		

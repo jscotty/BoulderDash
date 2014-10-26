@@ -189,6 +189,9 @@ package Game
 		
 		private var _intro3Sound:Sound;
 		private var _intro3Channel:SoundChannel;
+		private var _border:Border;
+		
+		private var walkCount:int;
 		
 		public function Game(s:Stage) 
 		{
@@ -282,24 +285,13 @@ package Game
 					_diamond.width = cellWidth;
 					_diamond.height = cellHeight;
 				}
-				else if (mapData[row][col] == 8) 
-				{
-					_end = new End();
-					artTiles[row][col] = _end;
-					addChild(_end);
-					_end.x = col * cellWidth + 17;
-					_end.y = row * cellHeight + 17;
-					_end.width = cellWidth;
-					_end.height = cellHeight;
-				}
-				
 				else if (mapData[row][col] == 7) 
 				{
 					_end = new End();
 					artTiles[row][col] = _end;
 					addChild(_end);
-					_end.x = col * cellWidth + 17;
-					_end.y = row * cellHeight + 17;
+					_end.x = col * cellWidth + 17 + _movementX;
+					_end.y = row * cellHeight + 17 + _movementY;
 					_end.width = cellWidth;
 					_end.height = cellHeight;
 				}
@@ -328,12 +320,16 @@ package Game
 			_diamondCounter.width = _diamondCounter.textWidth + 50; // maximale grootte text
 			_diamondCounter.setTextFormat(tf);
 			
+			_border = new Border();
+			_border.x = 0;
+			_border.y = 0;
+			addChild(_border);
+			
 		} else if (Main.level == 2) {
 			 for (row = 0; row < numRows; row++)  // Grid
         {
             for (col = 0; col < numColumns; col++)
             {
-              
 				
 				if (mapData2[row][col] == 0) 
 				{
@@ -391,8 +387,8 @@ package Game
 					_end = new End();
 					artTiles2[row][col] = _end;
 					addChild(_end);
-					_end.x = col * cellWidth + 17;
-					_end.y = row * cellHeight + 17;
+					_end.x = col * cellWidth + 17 + _movementX;
+					_end.y = row * cellHeight + 17 + _movementY;
 					_end.width = cellWidth;
 					_end.height = cellHeight;
 				}
@@ -421,16 +417,28 @@ package Game
 			_diamondCounter.y = _player.y - 289;
 			_diamondCounter.width = _diamondCounter.textWidth + 50; // maximale grootte text
 			_diamondCounter.setTextFormat(tf);
+			
+			
+			_border = new Border();
+			_border.x = 374 - 68;
+			_border.y = 442 - 34;
+			addChild(_border);
+			
+			_startAnim = new StartAnim();
+			_startAnim.x = 374 - 68;
+			_startAnim.y = 442 - 34;
+			addChild(_startAnim);
 		}
 			
-			
-			addEventListener(Event.ENTER_FRAME, camera);
 			
 			_startAnim = new StartAnim();
 			addChild(_startAnim);
 			
-				_player.addEventListener(Event.ENTER_FRAME, update, false, 0, true);
-				
+			addEventListener(Event.ENTER_FRAME, camera);
+			
+			
+			_player.addEventListener(Event.ENTER_FRAME, update, false, 0, true);
+			
 			
 		}										
 
@@ -440,7 +448,6 @@ package Game
 		{
 			//trace(_startCoutner);
 			_startCoutner += count;
-			
 			if (_startCoutner >= 105) {
 				_player._playerStart.play();
 				playIntro1();
@@ -466,7 +473,7 @@ package Game
 			indexStoneX = Math.floor(_stone.x / 34);
 			indexStoneY = Math.floor(_stone.y / 34);
 			
-			
+			//trace(mapData[indexY - 1][indexX]);
 			
 			if (score == 10) 
 			{
@@ -486,7 +493,7 @@ package Game
 			if (mapData[indexY - 1][indexX] == 4)
 			{
 				removeChild(artTiles[indexY - 1][indexX]);
-				mapData[indexY - 1][indexX] = 5;
+				mapData[indexY - 1][indexX] = 6;
 				score += 1;
 				
 				startCollectEffect();
@@ -508,6 +515,9 @@ package Game
 				_header.y = _lastStepY - 119;
 				_header.x = _lastStepX - 119;
 				
+				_border.y = _lastStepY - 119;
+				_border.x = _lastStepX - 119;
+				
 				_diamondCounter.y = _lastStepY - 119;
 				_diamondCounter.x = _lastStepX - 119 + 185;
 				
@@ -520,6 +530,9 @@ package Game
 				_header.y = _lastStepY - 119;
 				_header.x = _lastStepX - 119;
 				
+				_border.y = _lastStepY - 119;
+				_border.x = _lastStepX - 119;
+				
 				_diamondCounter.y = _lastStepY - 119;
 				_diamondCounter.x = _lastStepX - 119 + 185;
 				
@@ -531,6 +544,9 @@ package Game
 				
 				_header.y = _lastStepY - 119;
 				_header.x = _lastStepX - 119;
+				
+				_border.y = _lastStepY - 119;
+				_border.x = _lastStepX - 119;
 				
 				_diamondCounter.y = _lastStepY - 119;
 				_diamondCounter.x = _lastStepX - 119 + 185;
@@ -555,7 +571,7 @@ package Game
 			if (mapData2[indexY - 1][indexX] == 4)
 			{
 				removeChild(artTiles2[indexY - 1][indexX]);
-				mapData2[indexY - 1][indexX] = 5;
+				mapData2[indexY - 1][indexX] = 6;
 				score += 1;
 				
 				startCollectEffect();
@@ -577,6 +593,9 @@ package Game
 				_header.y = _lastStepY - 119;
 				_header.x = _lastStepX - 119;
 				
+				_border.y = _lastStepY - 119;
+				_border.x = _lastStepX - 119;
+				
 				_diamondCounter.y = _lastStepY - 119;
 				_diamondCounter.x = _lastStepX - 119 + 185;
 				
@@ -588,6 +607,9 @@ package Game
 				
 				_header.y = _lastStepY - 119;
 				_header.x = _lastStepX - 119;
+				
+				_border.y = _lastStepY - 119;
+				_border.x = _lastStepX - 119;
 				
 				_diamondCounter.y = _lastStepY - 119;
 				_diamondCounter.x = _lastStepX - 119 + 185;
@@ -601,6 +623,9 @@ package Game
 				_header.y = _lastStepY - 119;
 				_header.x = _lastStepX - 119;
 				
+				_border.y = _lastStepY - 119;
+				_border.x = _lastStepX - 119;
+				
 				_diamondCounter.y = _lastStepY - 119;
 				_diamondCounter.x = _lastStepX - 119 + 185;
 				
@@ -613,6 +638,28 @@ package Game
 			}
 			var _playX1:int = 629;
 			
+			if (score >= 15) {
+				if (mapData[indexY - 1][indexX] == 7)
+				{
+					_end.play();
+					
+					done();
+					
+				}
+				
+					//trace("won!");
+			}
+			
+		}
+		
+		private function done():void 
+		{
+			_player.removeEventListener(Event.ENTER_FRAME, update);
+			stage.removeEventListener(KeyboardEvent.KEY_DOWN, keyDown);
+			stage.removeEventListener(KeyboardEvent.KEY_UP, keyUp);
+			removeEventListener(Event.ENTER_FRAME, camera);
+			
+			dispatchEvent(new Event("done"));
 		}
 		
 		private function playIntro1():void 
@@ -642,6 +689,8 @@ package Game
 			{
 				_player.y -= 0;
 				_player.anim(1);
+				
+				walkCount = 0;
 			}
 			//trace("X " + _movementX + " - " + "Y " + _movementY);
 			
@@ -651,93 +700,119 @@ package Game
 		{
 			//trace(e.keyCode); // up:38, down:40,right:39,left:37
 			
-			if (e.keyCode == 38 || e.keyCode == 87) // KEY UP!
-			{
-				_player.y -= 34;
-				_movementY -= 34;
-				_player.anim(2);
+				if (e.keyCode == 38 || e.keyCode == 87) // KEY UP!
+				{
+					walkCount += 1;
+					if(walkCount == 1){
+					_player.y -= 34;
+					_movementY -= 34;
+					_player.anim(2);
+					
+					_header.y -= 34;
+					_diamondCounter.y -= 34;
+					_border.y -= 34;
+					
+					//movement();
+					_stoneHandler = new StoneHandler();
+					addChild(_stoneHandler);
+					
+					_lastStepY = _player.y + 34;
+					_lastStepX = _player.x;
+					
+					walkCount += 1;
+					}
+					
+					//trace("X: " + _player.x + " / Y: " + _player.y);
+					//trace("X: " + _lastStepX + " / Y: " + _lastStepY + "   // Last step");
+					
+				}
+				if (e.keyCode == 40 || e.keyCode == 83) // KEY DOWN!
+				{
+					
+					walkCount += 1;
+					if(walkCount == 1){
+					_player.y += 34;
+					_movementY += 34;
+					_player.anim(2);
+					
+					_header.y += 34;
+					_diamondCounter.y += 34;
+					_border.y += 34;
+					
+					
+					//movement();
+					_stoneHandler = new StoneHandler();
+					addChild(_stoneHandler);
+					
+					_lastStepY = _player.y - 34;
+					_lastStepX = _player.x;
+					
+					
+					walkCount += 1;
 				
-				_header.y -= 34;
-				_diamondCounter.y -= 34;
-				
-				//movement();
-				_stoneHandler = new StoneHandler();
-				addChild(_stoneHandler);
-				
-				_lastStepY = _player.y + 34;
-				_lastStepX = _player.x;
-				
-				
-				//trace("X: " + _player.x + " / Y: " + _player.y);
-				//trace("X: " + _lastStepX + " / Y: " + _lastStepY + "   // Last step");
-				
-			}
-			if (e.keyCode == 40 || e.keyCode == 83) // KEY DOWN!
-			{
-				_player.y += 34;
-				_movementY += 34;
-				_player.anim(2);
-				
-				_header.y += 34;
-				_diamondCounter.y += 34;
-				
-				
-				//movement();
-				_stoneHandler = new StoneHandler();
-				addChild(_stoneHandler);
-				
-				_lastStepY = _player.y - 34;
-				_lastStepX = _player.x;
-				
-				trace("X: " + _player.x + " / Y: " + _player.y);
-				trace("X: " + _lastStepX + " / Y: " + _lastStepY + "   // Last step");
-			}
-			if (e.keyCode == 39 || e.keyCode == 68) // KEY RIGHT!
-			{
-				_player.x += 34;
-				_movementX += 34;
-				_player.anim(2);
-				_player.scaleX = 1;
-				
-				_header.x += 34;
-				_diamondCounter.x += 34;
-				
-				
-				_stoneHandler = new StoneHandler();
-				addChild(_stoneHandler);
-				
-				_lastStepY = _player.y;
-				_lastStepX = _player.x - 34;
-				
-				trace("X: " + _player.x + " / Y: " + _player.y);
-				trace("X: " + _lastStepX + " / Y: " + _lastStepY + "   // Last step");
-			}
-			if (e.keyCode == 37 || e.keyCode == 65) // KEY LEFT!
-			{
-				_player.x -= 34;
-				_movementX -= 34;
-				_player.anim(2);
-				_player.scaleX = -1;
-				
-				_header.x -= 34;
-				_diamondCounter.x -= 34;
-				
-				
-				_stoneHandler = new StoneHandler();
-				addChild(_stoneHandler);
-				
-				_lastStepY = _player.y;
-				_lastStepX = _player.x + 34;
-				
-				trace("X: " + _player.x + " / Y: " + _player.y);
-				trace("X: " + _lastStepX + " / Y: " + _lastStepY + "   // Last step");
-			}
+					//trace("X: " + _player.x + " / Y: " + _player.y);
+					//trace("X: " + _lastStepX + " / Y: " + _lastStepY + "   // Last step");
+					}
+				}
+				if (e.keyCode == 39 || e.keyCode == 68) // KEY RIGHT!
+				{
+					walkCount += 1;
+					if (walkCount == 1){
+					_player.x += 34;
+					_movementX += 34;
+					_player.anim(2);
+					_player.scaleX = 1;
+					
+					_header.x += 34;
+					_diamondCounter.x += 34;
+					_border.x += 34;
+					
+					
+					_stoneHandler = new StoneHandler();
+					addChild(_stoneHandler);
+					
+					_lastStepY = _player.y;
+					_lastStepX = _player.x - 34;
+					
+					walkCount += 2;
+					
+					//trace("X: " + _player.x + " / Y: " + _player.y);
+					//trace("X: " + _lastStepX + " / Y: " + _lastStepY + "   // Last step");
+					}
+				}
+				if (e.keyCode == 37 || e.keyCode == 65) // KEY LEFT!
+				{
+					
+					walkCount += 1;
+					if (walkCount == 1){
+					_player.x -= 34;
+					_movementX -= 34;
+					_player.anim(2);
+					_player.scaleX = -1;
+					
+					_header.x -= 34;
+					_diamondCounter.x -= 34;
+					_border.x -= 34;
+					
+					
+					_stoneHandler = new StoneHandler();
+					addChild(_stoneHandler);
+					
+					_lastStepY = _player.y;
+					_lastStepX = _player.x + 34;
+					
+					walkCount += 2;
+					
+					//trace("X: " + _player.x + " / Y: " + _player.y);
+					//trace("X: " + _lastStepX + " / Y: " + _lastStepY + "   // Last step");
+					}
+				}
 		}
 		
 		private function camera(e:Event):void
 		{
 			if(Main.level == 1) root.scrollRect = new Rectangle(_player.x - 119, _player.y - 119, stage.stageWidth, stage.stageHeight);
-			if(Main.level ==2) root.scrollRect = new Rectangle(_player.x - 323, _player.y - 289, stage.stageWidth, stage.stageHeight);
+			if(Main.level == 2) root.scrollRect = new Rectangle(_player.x - 323, _player.y - 289, stage.stageWidth, stage.stageHeight);
 		}
 		private function cameraTwo(e:Event):void
 		{
