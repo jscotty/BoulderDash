@@ -19,7 +19,7 @@ package
 		private var _preLoader:PreLoader;
 		private var _game:Game;
 		
-		public static var level:int = 2;
+		public static var level:int = 1;
 		
 		public function Main():void 
 		{

@@ -5,6 +5,9 @@ package Game.Player
 	import flash.display.Stage;
 	import flash.events.Event;
 	import flash.events.KeyboardEvent;
+	import flash.media.Sound;
+	import flash.media.SoundChannel;
+	import flash.net.URLRequest;
 	import flash.ui.Keyboard;
 	/**
 	 * ...
@@ -14,8 +17,10 @@ package Game.Player
 	{
 		//private var _player:Player;
 		private var _playerIdle:PlayerIdle;
-		private var _playerStart:PlayerStart;
+		public var _playerStart:PlayerStart;
 		private var _playerMove:PlayerMove;
+		
+		private var animCount:int;
 		
 		public function Character() 
 		{
@@ -34,7 +39,6 @@ package Game.Player
 			_playerIdle.visible = false;	// idle
 		}
 		
-		
 		public function anim(animNr:int):void
 		{
 			if (animNr == 0) { 						// anim0 = start
@@ -44,7 +48,7 @@ package Game.Player
 				
 				_playerIdle.stop();
 				_playerMove.stop();
-				_playerStart.play();
+				_playerStart.stop();
 				
 			}
 			else if (animNr == 1) { 				// anim1 = idle

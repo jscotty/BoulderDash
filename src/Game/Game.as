@@ -152,6 +152,10 @@ package Game
 		private var _lastStepY:int;
 		private var _lastStepX:int;
 		
+		private var count:int = 1;
+		private var count2:int = 1;
+		
+		private var _startAnim:StartAnim;
 		
 		private var _movementX:int;
 		private var _movementY:Number = 34;
@@ -180,6 +184,11 @@ package Game
 		private var _introSound:Sound;
 		private var _introChannel:SoundChannel;
 		
+		private var _intro2Sound:Sound;
+		private var _intro2Channel:SoundChannel;
+		
+		private var _intro3Sound:Sound;
+		private var _intro3Channel:SoundChannel;
 		
 		public function Game(s:Stage) 
 		{
@@ -196,8 +205,18 @@ package Game
 			_introSound = new Sound;
 			_introChannel = new SoundChannel;
 			
-			_introSound.load(new URLRequest("intro.mp3"));
+			_introSound.load(new URLRequest("intro1.mp3"));
 			_introChannel = _introSound.play(0, 1);
+			
+			_intro2Sound = new Sound;
+			_intro2Channel = new SoundChannel;
+			
+			_intro2Sound.load(new URLRequest("intro.mp3"));
+			
+			_intro3Sound = new Sound;
+			_intro3Channel = new SoundChannel;
+			
+			_intro3Sound.load(new URLRequest("intro2.mp3"));
 			
 			tf = new TextFormat("Commodore 64 Pixelized Regular", 34, 0xeff225, true); // variable voor de text style.
 			//tf2 = new TextFormat("Commodore 64 Pixelized Regular", 34, 0xeff225, true); // variable voor de text style.
@@ -405,23 +424,39 @@ package Game
 		}
 			
 			
-			_player.addEventListener(Event.ENTER_FRAME, update, false, 0, true);
-			
 			addEventListener(Event.ENTER_FRAME, camera);
 			
-			_stoneHandler = new StoneHandler();
-			addChild(_stoneHandler);
+			_startAnim = new StartAnim();
+			addChild(_startAnim);
+			
+				_player.addEventListener(Event.ENTER_FRAME, update, false, 0, true);
+				
+			
 		}										
 
 //////////////////////////////////////////////////////// UPDATE/LOOP \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ 
 
 		private function update(e:Event):void 
 		{
-			_startCoutner += 1;
+			//trace(_startCoutner);
+			_startCoutner += count;
 			
-			if (_startCoutner >= 80) {
+			if (_startCoutner >= 105) {
+				_player._playerStart.play();
+				playIntro1();
+					
+				_stoneHandler = new StoneHandler();
+				addChild(_stoneHandler);
+					
+				if (_startCoutner >= 175) {
 					stage.addEventListener(KeyboardEvent.KEY_DOWN, keyDown, false, 0, true);
 					stage.addEventListener(KeyboardEvent.KEY_UP, keyUp, false, 0, true);
+					_intro3Channel = _intro3Sound.play(0, 1);
+					
+					count = 0;
+					_startCoutner = 0;
+					
+				}
 				}
 			//trace(_movementY);
 			
@@ -580,6 +615,14 @@ package Game
 			
 		}
 		
+		private function playIntro1():void 
+		{
+			count2 += 1;
+			if (count2 <= 2) {
+				_intro2Channel = _intro2Sound.play(1, 1);
+			}
+		}
+		
 		private function startCollectEffect():void 
 		{
 			_collectChannel = _collecSound.play(0,1);
@@ -608,7 +651,7 @@ package Game
 		{
 			//trace(e.keyCode); // up:38, down:40,right:39,left:37
 			
-			if (e.keyCode == 38) // KEY UP!
+			if (e.keyCode == 38 || e.keyCode == 87) // KEY UP!
 			{
 				_player.y -= 34;
 				_movementY -= 34;
@@ -625,11 +668,11 @@ package Game
 				_lastStepX = _player.x;
 				
 				
-				trace("X: " + _player.x + " / Y: " + _player.y);
-				trace("X: " + _lastStepX + " / Y: " + _lastStepY + "   // Last step");
+				//trace("X: " + _player.x + " / Y: " + _player.y);
+				//trace("X: " + _lastStepX + " / Y: " + _lastStepY + "   // Last step");
 				
 			}
-			if (e.keyCode == 40) // KEY DOWN!
+			if (e.keyCode == 40 || e.keyCode == 83) // KEY DOWN!
 			{
 				_player.y += 34;
 				_movementY += 34;
@@ -649,7 +692,7 @@ package Game
 				trace("X: " + _player.x + " / Y: " + _player.y);
 				trace("X: " + _lastStepX + " / Y: " + _lastStepY + "   // Last step");
 			}
-			if (e.keyCode == 39) // KEY RIGHT!
+			if (e.keyCode == 39 || e.keyCode == 68) // KEY RIGHT!
 			{
 				_player.x += 34;
 				_movementX += 34;
@@ -669,7 +712,7 @@ package Game
 				trace("X: " + _player.x + " / Y: " + _player.y);
 				trace("X: " + _lastStepX + " / Y: " + _lastStepY + "   // Last step");
 			}
-			if (e.keyCode == 37) // KEY LEFT!
+			if (e.keyCode == 37 || e.keyCode == 65) // KEY LEFT!
 			{
 				_player.x -= 34;
 				_movementX -= 34;

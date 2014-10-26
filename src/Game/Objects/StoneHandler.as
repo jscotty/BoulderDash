@@ -86,6 +86,7 @@ package Game.Objects
 						_artTiles[row][col].y += 34;
 						_mapData[row + 1][col] = 3;
 						_mapData[row][col] = 6;
+						trace(_mapData[row + 1][col]);
 						return true;			
 					}
 				}
